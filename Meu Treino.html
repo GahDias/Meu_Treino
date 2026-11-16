@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f5bff">
+<title>Meu Treino</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--tx:#141a2a;--mu:#6a7388;--ac:#2f5bff;--ac2:#e6ecff;--hot:#ff9f1c;--bd:#e3e7f0;--ok:#16a34a;--no:#dc2626;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e121c;--card:#171c2a;--tx:#eef1f8;--mu:#97a1b6;--ac:#6b8cff;--ac2:#212a4a;--bd:#262d40;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e121c;--card:#171c2a;--tx:#eef1f8;--mu:#97a1b6;--ac:#6b8cff;--ac2:#212a4a;--bd:#262d40;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--tx);font:16px/1.45 Sora,system-ui,-apple-system,"Segoe UI",sans-serif}
+#v{max-width:520px;margin:0 auto;padding:16px 16px 96px}
+h1{font-size:24px;margin:8px 0 16px}h2{font-size:17px;margin:20px 0 10px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:14px;margin-bottom:12px}
+.mu{color:var(--mu);font-size:14px}.row{display:flex;align-items:center;gap:10px}.sp{justify-content:space-between}
+button{font:inherit;cursor:pointer;border:0;border-radius:14px;padding:12px 16px;background:var(--ac2);color:var(--ac);font-weight:600;min-height:44px}
+button.p{background:var(--ac);color:#fff}button.d{background:transparent;color:var(--no)}button.g{background:transparent;color:var(--mu);padding:8px}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+input,select{font:inherit;width:100%;min-height:44px;padding:10px 12px;border-radius:12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx)}
+.grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.grid7 b{font-size:12px;color:var(--mu);font-weight:600}
+.day{padding:0;min-height:42px;border-radius:12px;background:transparent;color:var(--tx);font-weight:400}
+.day.on{background:var(--hot);color:#1b1200;font-weight:700}.day.td{box-shadow:inset 0 0 0 2px var(--ac)}.day.sel{background:var(--ac);color:#fff}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:8px}.chips button{white-space:nowrap;flex:none}.chips .a{background:var(--ac);color:#fff}
+.big{font-size:30px;font-weight:700}.start{display:flex;gap:8px;flex-wrap:wrap}.start button{flex:1 1 40%;padding:16px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--bd);display:flex;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+nav button{flex:1;background:none;color:var(--mu);font-size:12px;padding:6px;display:flex;flex-direction:column;align-items:center;gap:2px}nav button.a{color:var(--ac)}nav span{font-size:20px}
+.set{display:grid;grid-template-columns:28px 1fr 1fr 44px;gap:8px;align-items:center;margin-top:8px}
+svg text{fill:var(--mu);font-size:10px;font-family:inherit}
+#t{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 18px;border-radius:99px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s}#t.s{opacity:1}
+</style>
+</head>
+<body>
+<div id="v"></div>
+<nav id="n"></nav>
+<div id="t" role="status"></div>
+<script>
+const K='meutreino_v1',M=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const $=id=>document.getElementById(id),pad=n=>String(n).padStart(2,'0'),uid=()=>Math.random().toString(36).slice(2,9);
+const dk=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),fm=d=>d.slice(8)+'/'+d.slice(5,7);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function seed(){const c=(n,e)=>({id:uid(),name:n,ex:e.map(x=>({id:uid(),name:x}))});
+ const med={};['Peso (kg)','Altura (cm)','Cintura (cm)','Peito (cm)','Braço (cm)','Coxa (cm)','Quadril (cm)'].forEach(k=>med[k]=[]);
+ return{circ:[c('Superiores',['Supino reto','Desenvolvimento','Tríceps polia','Rosca direta']),c('Inferiores',['Agachamento','Leg press','Cadeira extensora','Panturrilha']),c('Costas',['Puxada frontal','Remada baixa','Remada curvada'])],ses:[],med}}
+function load(){try{const d=JSON.parse(localStorage.getItem(K));if(d&&d.circ)return d}catch(e){}return seed()}
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){toast('Não foi possível salvar neste navegador')}}
+let S=load(),tab='home',cur=new Date(),sel=null,W=null,E=null,mi=0,exSel=null,cf=false;
+function toast(m){const t=$('t');t.textContent=m;t.className='s';setTimeout(()=>t.className='',1800)}
+function go(t){tab=t;E=null;cf=false;render();scrollTo(0,0)}
+
+/* gráficos */
+function line(p){if(p.length<2)return'<p class="mu">Registre ao menos 2 valores para ver o gráfico.</p>';
+ const W=300,H=150,q=26,vs=p.map(x=>x.v);let a=Math.min(...vs),b=Math.max(...vs);if(a==b){a--;b++}
+ const X=i=>q+i*(W-2*q)/(p.length-1),Y=v=>H-q-(v-a)/(b-a)*(H-2*q);
+ return`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Gráfico de evolução"><polyline fill="none" stroke="var(--ac)" stroke-width="3" stroke-linejoin="round" points="${p.map((x,i)=>X(i)+','+Y(x.v)).join(' ')}"/>${p.map((x,i)=>`<circle cx="${X(i)}" cy="${Y(x.v)}" r="4" fill="var(--ac)"/>`).join('')}<text x="2" y="${Y(b)+4}">${+b.toFixed(1)}</text><text x="2" y="${Y(a)+4}">${+a.toFixed(1)}</text><text x="${q}" y="${H-6}">${p[0].l}</text><text x="${W-q}" y="${H-6}" text-anchor="end">${p[p.length-1].l}</text></svg>`}
+function bars(p){const W=300,H=150,q=24,mx=Math.max(1,...p.map(x=>x.v)),w=(W-q)/p.length;
+ return`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Treinos por mês">${p.map((x,i)=>{const h=x.v/mx*(H-2*q);return`<rect x="${q/2+i*w+8}" y="${H-q-h}" width="${w-16}" height="${h}" rx="6" fill="var(--ac)"/><text x="${q/2+i*w+w/2}" y="${H-q-h-5}" text-anchor="middle">${x.v}</text><text x="${q/2+i*w+w/2}" y="${H-8}" text-anchor="middle">${x.l}</text>`}).join('')}</svg>`}
+
+/* início */
+function home(){const y=cur.getFullYear(),m=cur.getMonth(),f=new Date(y,m,1).getDay(),n=new Date(y,m+1,0).getDate(),tr=new Set(S.ses.map(s=>s.d)),td=dk(new Date());
+ const pre=y+'-'+pad(m+1),cnt=S.ses.filter(s=>s.d.startsWith(pre)).length;
+ let c='';for(let i=0;i<f;i++)c+='<span></span>';
+ for(let i=1;i<=n;i++){const k=pre+'-'+pad(i);c+=`<button class="day ${tr.has(k)?'on':''} ${k==td?'td':''} ${sel==k?'sel':''}" onclick="pick('${k}')" aria-label="Dia ${i}${tr.has(k)?', treinado':''}">${i}</button>`}
+ const ds=sel?S.ses.filter(s=>s.d==sel):[];
+ return`<h1>Olá, bora treinar?</h1>
+ <h2>Iniciar treino</h2><div class="start">${S.circ.map(x=>`<button class="p" onclick="start('${x.id}')">${esc(x.name)}</button>`).join('')||'<p class="mu">Crie seu primeiro circuito na aba Circuitos.</p>'}</div>
+ <h2>Calendário</h2><div class="card"><div class="row sp"><button class="g" onclick="mo(-1)" aria-label="Mês anterior">‹</button><b>${M[m]} ${y}</b><button class="g" onclick="mo(1)" aria-label="Próximo mês">›</button></div>
+ <div class="grid7" style="margin-top:8px">${'DSTQQSS'.split('').map(x=>`<b>${x}</b>`).join('')}${c}</div>
+ <p class="mu" style="margin:10px 0 0"><b style="color:var(--tx)">${cnt}</b> ${cnt==1?'treino':'treinos'} neste mês</p></div>
+ ${sel?`<div class="card"><b>${sel.slice(8)}/${sel.slice(5,7)}</b>${ds.map(s=>`<div class="row sp"><div><div>${esc(s.name)}</div><div class="mu">${s.logs.map(l=>esc(l.name)+' '+l.sets.map(t=>t.kg+'×'+t.reps).join(', ')).join(' · ')}</div></div><button class="d" onclick="delSes('${s.id}')">Excluir</button></div>`).join('')||'<p class="mu">Sem treino neste dia.</p>'}</div>`:''}`}
+function pick(k){sel=sel==k?null:k;render()}
+function mo(n){cur=new Date(cur.getFullYear(),cur.getMonth()+n,1);sel=null;render()}
+function delSes(id){S.ses=S.ses.filter(s=>s.id!=id);save();render()}
+
+/* treino em andamento */
+function lastSets(nm){for(let i=S.ses.length-1;i>=0;i--){const l=S.ses[i].logs.find(x=>x.name==nm);if(l)return l.sets.map(s=>({kg:s.kg,reps:s.reps}))}return[{kg:'',reps:''}]}
+function start(id){const c=S.circ.find(x=>x.id==id);if(!c.ex.length){toast('Adicione exercícios ao circuito primeiro');return}
+ W={cid:id,name:c.name,logs:c.ex.map(e=>({name:e.name,sets:lastSets(e.name)}))};tab='work';render();scrollTo(0,0)}
+function work(){return`<div class="row sp"><h1>${esc(W.name)}</h1><button class="g" onclick="W=null;go('home')">Cancelar</button></div><p class="mu" style="margin-top:-8px">Os valores vêm da última vez. Ajuste a carga e as repetições.</p>
+ ${W.logs.map((l,i)=>`<div class="card"><b>${esc(l.name)}</b><div class="set mu"><span>#</span><span>Carga (kg)</span><span>Reps</span><span></span></div>
+ ${l.sets.map((s,j)=>`<div class="set"><span class="mu">${j+1}</span><input type="number" inputmode="decimal" value="${s.kg}" oninput="W.logs[${i}].sets[${j}].kg=this.value" aria-label="Carga série ${j+1}"><input type="number" inputmode="numeric" value="${s.reps}" oninput="W.logs[${i}].sets[${j}].reps=this.value" aria-label="Repetições série ${j+1}"><button class="g" onclick="rmSet(${i},${j})" aria-label="Remover série">✕</button></div>`).join('')}
+ <button style="margin-top:10px;width:100%" onclick="addSet(${i})">+ Série</button></div>`).join('')}
+ <button class="p" style="width:100%;padding:16px" onclick="finish()">Finalizar treino</button>`}
+function addSet(i){const s=W.logs[i].sets,l=s[s.length-1]||{kg:'',reps:''};s.push({kg:l.kg,reps:l.reps});render()}
+function rmSet(i,j){W.logs[i].sets.splice(j,1);render()}
+function finish(){const logs=W.logs.map(l=>({name:l.name,sets:l.sets.map(s=>({kg:+s.kg||0,reps:+s.reps||0})).filter(s=>s.kg||s.reps)})).filter(l=>l.sets.length);
+ if(!logs.length){toast('Preencha ao menos uma série');return}
+ S.ses.push({id:uid(),d:dk(new Date()),cid:W.cid,name:W.name,logs});save();W=null;go('home');toast('Treino salvo!')}
+
+/* circuitos */
+function circ(){if(E){const c=S.circ.find(x=>x.id==E);return`<div class="row sp"><h1>Editar circuito</h1><button class="g" onclick="E=null;cf=false;render()">Voltar</button></div>
+ <div class="card"><label class="mu" for="cn">Nome</label><input id="cn" value="${esc(c.name)}" onchange="c_name(this.value)"></div>
+ <h2>Exercícios</h2>${c.ex.map(e=>`<div class="card row sp"><span>${esc(e.name)}</span><button class="d" onclick="delEx('${e.id}')">Remover</button></div>`).join('')||'<p class="mu">Nenhum exercício ainda.</p>'}
+ <div class="row"><input id="ne" placeholder="Ex.: Supino inclinado" onkeydown="if(event.key=='Enter')addEx()"><button class="p" onclick="addEx()">Adicionar</button></div>
+ <button class="d" style="margin-top:24px;width:100%" onclick="delC()">${cf?'Toque de novo para excluir':'Excluir circuito'}</button>`}
+ return`<h1>Circuitos</h1>${S.circ.map(c=>`<button class="card row sp" style="width:100%;text-align:left;color:var(--tx)" onclick="E='${c.id}';render()"><span><b>${esc(c.name)}</b><br><span class="mu">${c.ex.length} exercícios</span></span><span>›</span></button>`).join('')}
+ <button class="p" style="width:100%" onclick="newC()">+ Novo circuito</button>`}
+function newC(){const c={id:uid(),name:'Novo circuito',ex:[]};S.circ.push(c);E=c.id;save();render()}
+function c_name(v){S.circ.find(x=>x.id==E).name=v.trim()||'Sem nome';save()}
+function addEx(){const v=$('ne').value.trim();if(!v)return;S.circ.find(x=>x.id==E).ex.push({id:uid(),name:v});save();render();$('ne').focus()}
+function delEx(id){const c=S.circ.find(x=>x.id==E);c.ex=c.ex.filter(e=>e.id!=id);save();render()}
+function delC(){if(!cf){cf=true;render();return}S.circ=S.circ.filter(x=>x.id!=E);E=null;cf=false;save();render()}
+
+/* medidas */
+function body(){const T=Object.keys(S.med),k=T[mi]||T[0],a=(S.med[k]||[]).slice().sort((x,y)=>x.d<y.d?-1:1),l=a[a.length-1],df=a.length>1?+(l.v-a[a.length-2].v).toFixed(1):null;
+ return`<h1>Medidas</h1><div class="chips">${T.map((t,i)=>`<button class="${i==mi?'a':''}" onclick="mi=${i};render()">${esc(t)}</button>`).join('')}</div>
+ <div class="card"><div class="mu">${esc(k)}</div><div class="big">${l?l.v:'—'}${df!==null?` <span class="mu" style="font-size:14px;font-weight:400">${df>0?'+':''}${df} desde o anterior</span>`:''}</div>${line(a.map(x=>({l:fm(x.d),v:x.v})))}</div>
+ <div class="card"><div class="row"><input id="mv" type="number" inputmode="decimal" placeholder="Novo valor"><input id="md" type="date" value="${dk(new Date())}"></div><button class="p" style="width:100%;margin-top:10px" onclick="addMed()">Registrar</button></div>
+ ${a.slice(-5).reverse().map(x=>`<div class="row sp mu" style="padding:4px 4px"><span>${fm(x.d)} · ${x.v}</span><button class="g" onclick="delMed('${x.d}',${x.v})" aria-label="Excluir registro">✕</button></div>`).join('')}
+ <h2>Nova medida</h2><div class="row"><input id="nt" placeholder="Ex.: Panturrilha (cm)"><button onclick="addType()">Criar</button></div>`}
+function addMed(){const v=parseFloat($('mv').value.replace(',','.')),k=Object.keys(S.med)[mi];if(isNaN(v)){toast('Digite um valor');return}
+ S.med[k].push({d:$('md').value||dk(new Date()),v});save();render();toast('Registrado!')}
+function delMed(d,v){const k=Object.keys(S.med)[mi],i=S.med[k].findIndex(x=>x.d==d&&x.v==v);if(i>-1)S.med[k].splice(i,1);save();render()}
+function addType(){const v=$('nt').value.trim();if(!v||S.med[v])return;S.med[v]=[];mi=Object.keys(S.med).length-1;save();render()}
+
+/* evolução */
+function stats(){const now=new Date(),fr=[];for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1),p=d.getFullYear()+'-'+pad(d.getMonth()+1);fr.push({l:M[d.getMonth()].slice(0,3),v:S.ses.filter(s=>s.d.startsWith(p)).length})}
+ const names=[...new Set([...S.circ.flatMap(c=>c.ex.map(e=>e.name)),...S.ses.flatMap(s=>s.logs.map(l=>l.name))])];if(!exSel||!names.includes(exSel))exSel=names[0];
+ const pts=S.ses.filter(s=>s.logs.some(l=>l.name==exSel)).map(s=>({l:fm(s.d),v:Math.max(...s.logs.find(l=>l.name==exSel).sets.map(t=>t.kg))}));
+ return`<h1>Evolução</h1><h2 style="margin-top:0">Frequência por mês</h2><div class="card">${bars(fr)}</div>
+ <h2>Evolução de carga</h2><div class="card"><select id="se" onchange="exSel=this.value;render()" aria-label="Exercício">${names.map(n=>`<option ${n==exSel?'selected':''}>${esc(n)}</option>`).join('')}</select><p class="mu">Maior carga (kg) em cada treino</p>${line(pts)}</div>`}
+
+function render(){const v=tab=='work'?work():tab=='home'?home():tab=='circ'?circ():tab=='body'?body():stats();$('v').innerHTML=v;
+ $('n').innerHTML=[['home','🗓','Início'],['circ','🏋️','Circuitos'],['body','📏','Medidas'],['stats','📈','Evolução']].map(t=>`<button class="${tab==t[0]||(tab=='work'&&t[0]=='home')?'a':''}" onclick="go('${t[0]}')"><span>${t[1]}</span>${t[2]}</button>`).join('')}
+render();
+</script>
+</body>
+</html>
